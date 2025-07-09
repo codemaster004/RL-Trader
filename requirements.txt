@@ -1,1 +1,4 @@
 torch~=2.7.1
+
+yfinance~=0.2.65
+matplotlib~=3.10.3

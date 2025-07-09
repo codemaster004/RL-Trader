@@ -1,0 +1,6 @@
+# Ignore all files in this directory, data files should not be sotred on GitHub, to download this your self please use 
+# python files in `scripts/`
+*
+
+# Do not ignore itself
+!.gitignore
