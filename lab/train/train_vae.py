@@ -40,16 +40,16 @@ def main():
 		transforms.ToTensor()
 	])
 	dataset = ImageFolder(root=pjoin("data", "images"), transform=transform)
-	loader = DataLoader(dataset, batch_size=32, shuffle=True)
+	loader = DataLoader(dataset, batch_size=64, shuffle=True)
 	
-	device = 'mps'
+	device = 'cuda'
 	model = VAE(latent_dim=8, input_res=256, device=device).to(device)
 	
 	optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 	
 	criterion = torch.nn.MSELoss()
 	
-	train(loader, model, criterion, optimizer, 10, device='mps')
+	train(loader, model, criterion, optimizer, 10, device=device)
 
 
 if __name__ == '__main__':

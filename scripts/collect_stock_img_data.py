@@ -30,6 +30,7 @@ def main():
 	makedirs(pjoin("data", "images"), exist_ok=True)
 
 	for ticker in tickers:
+		print(ticker)
 		df = pd.read_csv(pjoin("data", "tickers", f"{ticker}.csv"))
 		create_images(df, ticker)
 
