@@ -9,7 +9,7 @@ def download_save_ticker(ticker):
 	df = yf.download(ticker, start="2000-01-01", end="2025-06-08", interval="1d", group_by="ticker", multi_level_index=False)
 	df.reset_index(inplace=True)
 	
-	df.to_csv(pjoin("data", "tickers", ticker + ".csv"), index=False)
+	df.to_csv(pjoin("data", "tickers", f"{ticker}.csv"), index=False)
 
 
 def main():

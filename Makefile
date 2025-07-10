@@ -5,3 +5,6 @@ PYTHON := .venv/bin/python
 
 download_data:
 	$(PYTHON) scripts/download_stock_data.py
+
+prep_data:
+	$(PYTHON) scripts/collect_stock_img_data.py
