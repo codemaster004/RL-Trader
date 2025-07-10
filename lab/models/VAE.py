@@ -5,11 +5,12 @@ from lab.models.modules import DownConv, UpConv
 
 
 class VAE(nn.Module):
-	def __init__(self, latent_dim=32, base_channels=128, channel_multiplier=(1, 2, 3, 4), input_res=128):
+	def __init__(self, latent_dim=32, base_channels=128, channel_multiplier=(1, 2, 3, 4), input_res=128, device="cpu"):
 		super().__init__()
 		
 		self.latent_dim = latent_dim
 		self.out_res = input_res / 2 ** len(channel_multiplier)
+		self.device = device
 		
 		# Input convolution
 		
@@ -52,7 +53,7 @@ class VAE(nn.Module):
 		return z, mu, logvar
 	
 	def reparameterize(self, mu, logvar):
-		z = mu + torch.exp(0.5 * logvar) * torch.randn(self.latent_dim)
+		z = mu + torch.exp(0.5 * logvar) * torch.randn(self.latent_dim, device=self.device, requires_grad=False)
 		return z
 	
 	def decode(self, z):
