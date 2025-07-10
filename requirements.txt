@@ -2,3 +2,6 @@ torch~=2.7.1
 
 yfinance~=0.2.65
 matplotlib~=3.10.3
+
+torchvision~=0.22.1
+pandas~=2.3.1
