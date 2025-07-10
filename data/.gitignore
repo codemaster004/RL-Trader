@@ -4,3 +4,6 @@
 
 # Do not ignore itself
 !.gitignore
+
+# Do not ignore main ticker file
+!tickers.json
