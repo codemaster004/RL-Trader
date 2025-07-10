@@ -16,9 +16,10 @@ def save_image(df, path):
 
 
 def create_images(df, ticker, n_days=30):
+	makedirs(pjoin("data", "images", ticker), exist_ok=True)
 	i = 0
 	while i + n_days < len(df):
-		save_image(df[i:i + n_days], pjoin("data", "images", f"{ticker}-{str(i)}.jpg"))
+		save_image(df[i:i + n_days], pjoin("data", "images", ticker, f"{ticker}-{str(i)}.jpg"))
 		i += 1
 
 

@@ -3,6 +3,9 @@ PYTHON_BASE := python3
 PYTHON := .venv/bin/python
 
 
+train_vae:
+	$(PYTHON) -m lab.train.train_vae
+
 download_data:
 	$(PYTHON) scripts/download_stock_data.py
 
