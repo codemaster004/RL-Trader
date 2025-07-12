@@ -1,12 +1,15 @@
 import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
-
-from os.path import join as pjoin
-
 from torchvision.transforms import transforms
 
+from os import makedirs
+from os.path import join as pjoin
+import logging as log
+
 from lab.models.VAE import VAE
+
+log.basicConfig(level=log.INFO)
 
 
 def train(dataloader, model: VAE, criterion, optimizer, epochs, device):
@@ -31,7 +34,9 @@ def train(dataloader, model: VAE, criterion, optimizer, epochs, device):
 			loss.backward()
 			optimizer.step()
 
-		print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}, Recon: {recon_loss.item():.4f}, KL: {kl_loss.item():.4f}")
+		log.info(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}, Recon: {recon_loss.item():.4f}, KL: {kl_loss.item():.4f}")
+	
+	return model
 
 
 def main():
@@ -40,16 +45,31 @@ def main():
 		transforms.ToTensor()
 	])
 	dataset = ImageFolder(root=pjoin("data", "images"), transform=transform)
-	loader = DataLoader(dataset, batch_size=64, shuffle=True)
+	loader = DataLoader(dataset, batch_size=8, shuffle=True)
 	
-	device = 'cuda'
-	model = VAE(latent_dim=8, input_res=256, device=device).to(device)
+	makedirs(pjoin("models", "vae"), exist_ok=True)
 	
-	optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+	experiments = [
+		(24, 256),
+		(16, 256),
+		(8, 256),
+		(4, 256),
+		(24, 128),
+		(16, 128),
+		(8, 128),
+		(4, 128),
+	]
 	
-	criterion = torch.nn.MSELoss()
-	
-	train(loader, model, criterion, optimizer, 10, device=device)
+	device = 'mps'
+	for i, e in enumerate(experiments):
+		model = VAE(latent_dim=e[0], base_channels=e[1], input_res=256, device=device).to(device)
+		
+		optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+		criterion = torch.nn.MSELoss()
+		
+		log.info(f"Experiment {str(i)}: ({str(e[0])}, {str(e[1])})")
+		model = train(loader, model, criterion, optimizer, 50, device=device)
+		model.save(pjoin("models", "vae", f"vae_{str(i)}.pt"))
 
 
 if __name__ == '__main__':
