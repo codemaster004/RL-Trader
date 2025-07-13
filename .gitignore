@@ -8,3 +8,6 @@ venv
 # Ignore private .env files
 *.env
 .env
+
+# Ignore .run folder with saved run configurations
+.run/
