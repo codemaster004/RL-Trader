@@ -9,7 +9,7 @@ import logging as log
 
 from lab.models.VAE import VAE
 
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 def train(dataloader, model: VAE, criterion, optimizer, epochs, device):
@@ -29,7 +29,6 @@ def train(dataloader, model: VAE, criterion, optimizer, epochs, device):
 
 			loss = recon_loss + kl_loss
 
-			# --- 3. Backpropagation ---
 			optimizer.zero_grad()
 			loss.backward()
 			optimizer.step()
@@ -45,30 +44,30 @@ def main():
 		transforms.ToTensor()
 	])
 	dataset = ImageFolder(root=pjoin("data", "images"), transform=transform)
-	loader = DataLoader(dataset, batch_size=8, shuffle=True)
+	loader = DataLoader(dataset, batch_size=28, shuffle=True, num_workers=4, persistent_workers=True)
 	
 	makedirs(pjoin("models", "vae"), exist_ok=True)
 	
 	experiments = [
-		(24, 256),
-		(16, 256),
-		(8, 256),
-		(4, 256),
-		(24, 128),
-		(16, 128),
+		# (16, 256),
+		# (8, 256),
+		# (4, 256),
+		# (24, 128),
+		# (16, 128),
 		(8, 128),
-		(4, 128),
+		# (4, 128),
 	]
 	
-	device = 'mps'
+	device = 'cuda'
 	for i, e in enumerate(experiments):
+		torch.random.manual_seed(0)
 		model = VAE(latent_dim=e[0], base_channels=e[1], input_res=256, device=device).to(device)
 		
-		optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+		optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 		criterion = torch.nn.MSELoss()
 		
 		log.info(f"Experiment {str(i)}: ({str(e[0])}, {str(e[1])})")
-		model = train(loader, model, criterion, optimizer, 50, device=device)
+		model = train(loader, model, criterion, optimizer, 200, device=device)
 		torch.save(model.state_dict(), pjoin("models", "vae", f"vae_{str(i)}.pt"))
 
 
