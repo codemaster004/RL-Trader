@@ -1,0 +1,5 @@
+# Ignore all files in this directory, trained model files should not put on GitHub
+*
+
+# Do not ignore itself
+!.gitignore
