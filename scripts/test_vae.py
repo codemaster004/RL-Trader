@@ -15,7 +15,7 @@ def main():
 	])
 	to_pil = transforms.ToPILImage()
 	
-	model.load_state_dict(torch.load('models/vae/vae_0.pt', map_location=device))
+	model.load_state_dict(torch.load('saves/vae/vae_0.pt', map_location=device))
 	model.to(device)
 	model.eval()
 

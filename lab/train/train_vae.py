@@ -68,7 +68,7 @@ def main():
 		
 		log.info(f"Experiment {str(i)}: ({str(e[0])}, {str(e[1])})")
 		model = train(loader, model, criterion, optimizer, 200, device=device)
-		torch.save(model.state_dict(), pjoin("models", "vae", f"vae_{str(i)}.pt"))
+		torch.save(model.state_dict(), pjoin("saves", "vae", f"vae_{str(i)}.pt"))
 
 
 if __name__ == '__main__':
