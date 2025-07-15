@@ -3,13 +3,9 @@ from omegaconf import DictConfig, OmegaConf
 
 import importlib
 
-from lab.envs import SimpleTrends
-
 
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
-	print(OmegaConf.to_yaml(cfg, resolve=True))
-
 	# Dynamically loading, based on config.
 	env_path, env_name = cfg.env.type, cfg.env.name
 	env_cls = getattr(importlib.import_module(env_path), env_name)  # dynamic load a given class from a library

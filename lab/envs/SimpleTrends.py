@@ -2,13 +2,14 @@ from gymnasium import spaces
 import numpy as np
 
 from lab.envs.GenerativeEnv import GenerativeEnv
+from lab.envs._common import Actions
 
 
 class SimpleTrends(GenerativeEnv):
 	metadata = {"render_modes": ["human"]}
 
 	def __init__(self, simulations_length=356):
-		super(SimpleTrends, self).__init__()
+		super(SimpleTrends, self).__init__(simulations_length)
 		# Parent attributes
 		# 0: Hold, 1: Buy, 2: Sell
 		self.action_space = spaces.Discrete(3)
@@ -36,12 +37,12 @@ class SimpleTrends(GenerativeEnv):
 
 	def step(self, action):
 		current_price = float(self._prices[-1])
-		if action == 0:  # 0: Hold
+		if action == Actions.HOLD.value:
 			pass
-		elif action == 1:  # 1: Buy
+		elif action == Actions.BUY.value:
 			self.shares_count += self.funds // current_price
 			self.funds -= current_price * self.shares_count
-		elif action == 2:  # 1: Sell
+		elif action == Actions.SELL.value:
 			self.funds += current_price * self.shares_count
 			self.shares_count = 0
 		

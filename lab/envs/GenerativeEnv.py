@@ -53,6 +53,10 @@ class GenerativeEnv(gym.Env):
 		self.truncated = self._is_truncated()
 		self.reward = self._calc_reward()
 	
+	@property
+	def price(self):
+		return self._prices[-1]
+	
 	def _determine_state(self):
 		raise NotImplementedError  # Must be overwritten
 	
