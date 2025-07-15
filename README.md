@@ -1,4 +1,4 @@
-# 🧠 RL-Trader: Reinforcement Learning for Market Strategy with World Models
+# 🧠 RL-Trader: Reinforcement Learning for Market Strategy with Gymnasium
 
 This is an experimental project exploring how Reinforcement Learning can be applied to stock trading, using real historical data from TradingView.
 
