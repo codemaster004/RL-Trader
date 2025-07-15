@@ -17,7 +17,7 @@ Inspired by the World Models approach, the goal is to teach an agent to trade a 
 
 ## 📦 Project Status
 
-🟡 **Work in Progress** – Currently building and training the VAE
+🟡 **Work in Progress** – Currently building testing simple strategies
 
 ---
 
