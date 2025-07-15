@@ -1,0 +1,7 @@
+defaults:
+  - env: sma_trends
+  - agent: mc_agent
+  - train: default
+  - _self_
+
+seed: 1
