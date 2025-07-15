@@ -47,12 +47,12 @@ class MonteCarloAgent:
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env, episodes=10_000, discounting=0.9, learning_rate=0.01, epsilon=0.3, trajectories_per_update=1):
+	def train(self, env, episodes=10_000, discounting=0.9, learning_rate=0.01, trajectories_per_episode=1, epsilon=0.3):
 		print('Starting Monte Carlo Training...')
 		for episode in range(episodes):
 			self.buffer.reset()
 			# Collect Experience
-			for _ in range(trajectories_per_update):
+			for _ in range(trajectories_per_episode):
 				self._run_episode(env, epsilon)
 
 			states, actions, rewards = self.buffer.get()
@@ -99,6 +99,6 @@ if __name__ == '__main__':
 
 	env = SimpleTrends(simulations_length=356*5)
 	agent = MonteCarloAgent(state_dim=(3, 2), action_dim=3)
-	agent.train(env, episodes=5000, trajectories_per_update=5)
+	agent.train(env, episodes=5000, trajectories_per_episode=5)
 	agent.save(path='saves/')
 	print(agent.q_table)
