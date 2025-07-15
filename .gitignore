@@ -5,7 +5,7 @@ venv
 # Ignore IDE files
 .idea
 
-# Ignore private .env files
+# Ignore private .envs files
 *.env
 .env
 
