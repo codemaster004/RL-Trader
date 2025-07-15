@@ -1,0 +1,10 @@
+name: MonteCarloAgent
+type: lab.agents.mc_agent
+
+params:
+  state_dim: ${env.state_dim}
+  action_dim: ${env.action_dim}
+  options: {}
+
+train_params:
+  epsilon: 0.3

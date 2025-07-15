@@ -1,0 +1,8 @@
+name: SimpleTrends
+type: lab.envs.SimpleTrends
+
+state_dim: [3, 2]
+action_dim: [3]
+
+params:
+  simulations_length: 1780

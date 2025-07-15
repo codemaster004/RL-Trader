@@ -1,0 +1,5 @@
+params:
+  episodes: 10_000
+  discounting: 0.99
+  learning_rate: 0.001
+  trajectories_per_episode: 1

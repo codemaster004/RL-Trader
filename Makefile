@@ -3,11 +3,14 @@ PYTHON_BASE := python3
 PYTHON := .venv/bin/python
 
 
+train_agent:
+	$(PYTHON) -m lab.experiments.train_agent
+
 train_vae:
 	$(PYTHON) -m lab.train.train_vae
 
-download_data:
+run_download_data:
 	$(PYTHON) scripts/download_stock_data.py
 
-prep_data:
+run_prep_data:
 	$(PYTHON) scripts/collect_stock_img_data.py

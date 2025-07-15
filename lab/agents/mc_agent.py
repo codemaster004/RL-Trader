@@ -30,7 +30,7 @@ class MonteCarloAgent:
 		self.state_dim = state_dim
 		self.action_dim = action_dim
 
-		self.q_table = np.zeros((*self.state_dim, self.action_dim))
+		self.q_table = np.zeros((*self.state_dim, *self.action_dim))
 		self.buffer = MCBuffer()
 
 	def select_action(self, state, mask, epsilon=0.1):
@@ -92,13 +92,3 @@ class MonteCarloAgent:
 			running_sum = rewards[t] + lam * running_sum
 			rewards[t] = running_sum
 		return rewards
-
-
-if __name__ == '__main__':
-	from lab.envs.SimpleTrends import SimpleTrends
-
-	env = SimpleTrends(simulations_length=356*5)
-	agent = MonteCarloAgent(state_dim=(3, 2), action_dim=3)
-	agent.train(env, episodes=5000, trajectories_per_episode=5)
-	agent.save(path='saves/')
-	print(agent.q_table)
