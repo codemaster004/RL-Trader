@@ -43,7 +43,7 @@ class GenerativeEnv(gym.Env):
 		self.current_step = 0
 		
 		# Generate historical data
-		self._prices = self._init_gen_prices(**options)
+		self._prices = self._init_gen_prices(**self.init_options)
 	
 	def step(self, action):
 		self._prices = np.append(self._prices, self._gen_next_price(self._prices[-1], **self.init_options))
@@ -57,11 +57,20 @@ class GenerativeEnv(gym.Env):
 	def price(self):
 		return self._prices[-1]
 	
+	def get_prices(self):
+		return self._prices[self._get_plot_range()]
+	
+	def plot(self, ax):
+		ax.plot(self._prices[self._get_plot_range()], label="price", marker=".")
+	
 	def _determine_state(self):
 		raise NotImplementedError  # Must be overwritten
 	
 	def _get_info(self):
 		raise NotImplementedError  # Must be overwritten
+
+	def _get_plot_range(self):
+		return range(self.init_options["init_days"], self.init_options["init_days"] + self.current_step)
 
 	def _calc_reward(self):
 		if self.truncated:
@@ -77,8 +86,8 @@ class GenerativeEnv(gym.Env):
 		return self._prices[-1] <= 0
 
 	@staticmethod
-	def _init_gen_prices(start_price=100.0, num_days=5, mu=0.0005, sigma=0.01, df=5, *args, **kwargs):
-		log_returns = GenerativeEnv._gen_returns_t(num_days=num_days, mu=mu, sigma=sigma, df=df)
+	def _init_gen_prices(start_price=100.0, init_days=5, mu=0.0005, sigma=0.01, df=5, *args, **kwargs):
+		log_returns = GenerativeEnv._gen_returns_t(num_days=init_days, mu=mu, sigma=sigma, df=df)
 		log_prices = np.cumsum(log_returns)
 		return start_price * np.exp(log_prices)
 

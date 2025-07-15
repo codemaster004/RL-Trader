@@ -3,6 +3,9 @@ PYTHON_BASE := python3
 PYTHON := .venv/bin/python
 
 
+eval_agent:
+	$(PYTHON) -m lab.experiments.eval_agent
+
 train_agent:
 	$(PYTHON) -m lab.experiments.train_agent
 

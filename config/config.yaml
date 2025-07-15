@@ -5,3 +5,7 @@ defaults:
   - _self_
 
 seed: 1
+
+env:
+  params:
+    simulations_length: 356

@@ -58,7 +58,12 @@ class SimpleTrends(GenerativeEnv):
 		return self.state, self.reward, self.terminated, self.truncated, self.info
 
 	def render(self):
-		print(f"{self.funds=}, {self.shares_count=}, {self._prices[-1]=}")
+		print(f"{self.funds=}, {self.shares_count=}, {self.price=}")
+	
+	def plot(self, ax):
+		super().plot(ax=ax)
+		ax.plot(self._short_sma[self._get_plot_range()], label=f"Short SMA ({self.init_options['short_sma']})", linestyle='-')
+		ax.plot(self._long_sma[self._get_plot_range()], label=f"Long SMA ({self.init_options['long_sma']})")
 
 	def close(self):
 		pass
