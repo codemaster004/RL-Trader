@@ -40,11 +40,9 @@ class SimpleTrends(GenerativeEnv):
 		if action == Actions.HOLD.value:
 			pass
 		elif action == Actions.BUY.value:
-			self.shares_count += self.funds // current_price
-			self.funds -= current_price * self.shares_count
+			self.buy(self.funds // current_price)
 		elif action == Actions.SELL.value:
-			self.funds += current_price * self.shares_count
-			self.shares_count = 0
+			self.sell(self.shares_count)
 		
 		super().step(action=action)
 		

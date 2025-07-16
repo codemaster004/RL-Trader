@@ -31,6 +31,8 @@ class GenerativeEnv(gym.Env):
 		
 		# Protected
 		self._prices = None
+		
+		self._buy_history = None
 	
 	def reset(self, seed=None, options=None):
 		if options is None:
@@ -44,6 +46,7 @@ class GenerativeEnv(gym.Env):
 		
 		# Generate historical data
 		self._prices = self._init_gen_prices(**self.init_options)
+		self._buy_history = {}
 	
 	def step(self, action):
 		self._prices = np.append(self._prices, self._gen_next_price(self._prices[-1], **self.init_options))
@@ -52,6 +55,17 @@ class GenerativeEnv(gym.Env):
 		self.terminated = self._is_terminated()
 		self.truncated = self._is_truncated()
 		self.reward = self._calc_reward()
+	
+	def buy(self, amount):
+		self.shares_count += amount
+		self.funds -= amount * self.price
+		self._buy_history[self.price] = amount
+	
+	def sell(self, amount):
+		# todo: improve
+		self.shares_count -= amount
+		self.funds += amount * self.price
+		self._buy_history = {}
 	
 	@property
 	def price(self):
@@ -77,7 +91,11 @@ class GenerativeEnv(gym.Env):
 			return -100
 		if self.shares_count <= 0:
 			return 0
-		return -1 if self._prices[-2] - self._prices[-1] <= 0 else 1
+		
+		gain = 0
+		for acquisition_price, amount in self._buy_history.items():
+			gain += amount * acquisition_price - self.price
+		return gain
 
 	def _is_terminated(self):
 		return self.current_step >= self.max_steps

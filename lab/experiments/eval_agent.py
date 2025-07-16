@@ -32,13 +32,15 @@ def eval_agent(env, agent):
 		mask = info['action_mask']
 		done = terminated or truncated
 	
+	env.sell(env.shares_count)
+	
 	fig, ax = plt.subplots(figsize=(10, 5))
 	env.plot(ax=ax)
 	
 	ax.scatter(agent_buy_actions, env.get_prices()[agent_buy_actions] - 0.3, marker="^", color="seagreen", label="Buy", zorder=5)
 	ax.scatter(agent_sell_actions, env.get_prices()[agent_sell_actions] + 0.3, marker="v", color="firebrick", label="Sell", zorder=5)
 	
-	plt.title(f"Single Agent Run")
+	plt.title(f"Single Agent Run: {int(env.funds)}")
 	plt.grid(True)
 	plt.legend()
 	plt.tight_layout()
