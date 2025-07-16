@@ -8,4 +8,8 @@ seed: 1
 
 env:
   params:
-    simulations_length: 356
+    simulations_length: 3560
+
+train:
+  params:
+    trajectories_per_episode: 10

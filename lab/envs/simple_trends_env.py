@@ -1,7 +1,7 @@
 from gymnasium import spaces
 import numpy as np
 
-from lab.envs.GenerativeEnv import GenerativeEnv
+from lab.envs.base_generative_env import GenerativeEnv
 from lab.envs._common import Actions
 
 
@@ -36,14 +36,27 @@ class SimpleTrends(GenerativeEnv):
 		return self.state, self._get_info()
 
 	def step(self, action):
-		current_price = float(self._prices[-1])
+		current_price = self.price
+		
+		# Check for invalid action
+		if action not in [a.value for a in Actions]:
+			raise ValueError(f"Invalid action: {action}")
+
+		# Prevent divide-by-zero or invalid trading
+		if current_price <= 0:
+			raise ValueError(f"Invalid price: {current_price}")
+
 		if action == Actions.HOLD.value:
 			pass
 		elif action == Actions.BUY.value:
-			self.buy(self.funds // current_price)
+			buy_amount = int(self.funds // current_price)
+			if buy_amount > 0:
+				self.buy(buy_amount)
 		elif action == Actions.SELL.value:
-			self.sell(self.shares_count)
-		
+			if self.shares_count > 0:
+				self.sell(self.shares_count)
+
+		# Proceed with environment dynamics
 		super().step(action=action)
 		
 		# Update to Simple Moving Avg

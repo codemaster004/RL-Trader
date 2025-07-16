@@ -94,7 +94,7 @@ class GenerativeEnv(gym.Env):
 		
 		gain = 0
 		for acquisition_price, amount in self._buy_history.items():
-			gain += amount * acquisition_price - self.price
+			gain += amount * (acquisition_price - self.price)
 		return gain
 
 	def _is_terminated(self):

@@ -1,5 +1,5 @@
 name: SimpleTrends
-type: lab.envs.SimpleTrends
+type: lab.envs.simple_trends_env
 
 state_dim: [3, 2]
 action_dim: [3]
