@@ -23,10 +23,10 @@ def eval_agent(env, agent):
 		action = agent.select_action(state, mask, epsilon=0)
 		if action == Actions.BUY.value:
 			agent_buy_actions.append(env.current_step)
-			print(f'BUY at {env.price}')
+			print(f'BUY at {round(env.price, 2)}')
 		elif action == Actions.SELL.value:
 			agent_sell_actions.append(env.current_step)
-			print(f'SELL at {env.price}')
+			print(f'SELL at {round(env.price, 2)}')
 
 		state, reward, terminated, truncated, info = env.step(action)
 		mask = info['action_mask']

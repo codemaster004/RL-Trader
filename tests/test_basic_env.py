@@ -62,7 +62,7 @@ def test_calc_reward_handles_no_shares(env):
 	env._buy_history = {}
 	env.shares_count = 0
 	reward = env._calc_reward()
-	assert reward == 0
+	assert reward == -1
 
 
 def test_calc_reward_handles_truncated(env):
@@ -90,11 +90,11 @@ def test_plot_range_bounds(env):
 
 
 @pytest.mark.parametrize("acquisition_price, current_price, amount, expected_reward", [
-	(100.0, 105.0, 1, -5.0),  # loss because price > buy price
-	(105.0, 100.0, 1, 5.0),  # gain because price < buy price
+	(100.0, 105.0, 1, 5.0),  # gain because price > buy price
+	(105.0, 100.0, 1, -5.0),  # loss because price < buy price
 	(100.0, 100.0, 1, 0.0),  # no gain/loss
-	(100.0, 90.0, 3, 30.0),  # larger gain (buy high, now lower)
-	(90.0, 100.0, 2, -20.0),  # larger loss (buy low, now higher)
+	(100.0, 90.0, 3, -30.0),  # larger loss (buy high, now lower)
+	(90.0, 100.0, 2, 20.0),  # larger gain (buy low, now higher)
 ])
 def test_calc_reward_with_holdings(acquisition_price, current_price, amount, expected_reward):
 	env = GenerativeEnv()

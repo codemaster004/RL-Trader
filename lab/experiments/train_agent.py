@@ -14,7 +14,7 @@ def main(cfg: DictConfig):
 	# Dynamic load of Agent class
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 	
-	agent.train(env, **cfg.train.params, **cfg.agent.train_params)
+	agent.train(env=env, **cfg.train.params, **cfg.agent.train_params)
 	agent.save(path='saves/')
 	print(agent.q_table)
 

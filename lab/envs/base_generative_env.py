@@ -87,14 +87,20 @@ class GenerativeEnv(gym.Env):
 		return range(self.init_options["init_days"], self.init_options["init_days"] + self.current_step)
 
 	def _calc_reward(self):
+		# Stock price <= 0, bankrupt
 		if self.truncated:
 			return -100
+		# Small penalty for not being on the market
 		if self.shares_count <= 0:
-			return 0
+			return -1
+		# At the end or run, reward is the summ of funds and value of all shares
+		# if self.terminated:
+		# 	return self.funds + self.shares_count * self.price
 		
+		# Reward is the difference between price when bought the stock and current price
 		gain = 0
 		for acquisition_price, amount in self._buy_history.items():
-			gain += amount * (acquisition_price - self.price)
+			gain += (self.price - acquisition_price) * amount
 		return gain
 
 	def _is_terminated(self):

@@ -46,6 +46,9 @@ class SimpleTrends(GenerativeEnv):
 		if current_price <= 0:
 			raise ValueError(f"Invalid price: {current_price}")
 
+		# Proceed with environment dynamics
+		super().step(action=action)
+		
 		if action == Actions.HOLD.value:
 			pass
 		elif action == Actions.BUY.value:
@@ -56,9 +59,6 @@ class SimpleTrends(GenerativeEnv):
 			if self.shares_count > 0:
 				self.sell(self.shares_count)
 
-		# Proceed with environment dynamics
-		super().step(action=action)
-		
 		# Update to Simple Moving Avg
 		self._short_sma = np.append(self._short_sma, self._calc_new_sma(self._prices, self.init_options["short_sma"]))
 		self._long_sma = np.append(self._long_sma, self._calc_new_sma(self._prices, self.init_options["long_sma"]))
