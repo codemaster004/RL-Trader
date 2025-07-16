@@ -6,13 +6,15 @@ from omegaconf import DictConfig
 
 from lab.envs import Actions
 
+import logging as log
+
 
 def eval_agent(env, agent):
 	state, info = env.reset()
 	mask = info['action_mask']
 	
-	print("Starting Evaluation")
-	print("Agent Strategy:")
+	log.info("Starting Evaluation")
+	log.info("Agent Strategy:")
 	print(agent.q_table)
 	
 	agent_buy_actions = []
@@ -23,10 +25,10 @@ def eval_agent(env, agent):
 		action = agent.select_action(state, mask, epsilon=0)
 		if action == Actions.BUY.value:
 			agent_buy_actions.append(env.current_step)
-			print(f'BUY at {round(env.price, 2)}')
+			log.info(f'BUY at {round(env.price, 2)}')
 		elif action == Actions.SELL.value:
 			agent_sell_actions.append(env.current_step)
-			print(f'SELL at {round(env.price, 2)}')
+			log.info(f'SELL at {round(env.price, 2)}')
 
 		state, reward, terminated, truncated, info = env.step(action)
 		mask = info['action_mask']

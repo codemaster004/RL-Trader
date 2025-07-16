@@ -4,6 +4,8 @@ import numpy as np
 from lab.envs.base_generative_env import GenerativeEnv
 from lab.envs._common import Actions
 
+import logging as log
+
 
 class SimpleTrends(GenerativeEnv):
 	metadata = {"render_modes": ["human"]}
@@ -69,7 +71,7 @@ class SimpleTrends(GenerativeEnv):
 		return self.state, self.reward, self.terminated, self.truncated, self.info
 
 	def render(self):
-		print(f"{self.funds=}, {self.shares_count=}, {self.price=}")
+		log.info(f"{self.funds=}, {self.shares_count=}, {self.price=}")
 	
 	def plot(self, ax):
 		super().plot(ax=ax)

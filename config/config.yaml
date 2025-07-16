@@ -3,6 +3,7 @@ defaults:
   - agent: mc_agent
   - train: default
   - _self_
+  - override hydra/job_logging: custom
 
 seed: 1
 

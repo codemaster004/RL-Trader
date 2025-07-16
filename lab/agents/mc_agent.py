@@ -1,6 +1,7 @@
 from os.path import join as pjoin
 
 import numpy as np
+import logging as log
 
 
 class MCBuffer:
@@ -48,7 +49,7 @@ class MonteCarloAgent:
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
 	def train(self, env, episodes=10_000, discounting=0.9, learning_rate=0.01, trajectories_per_episode=1, epsilon=0.3):
-		print('Starting Monte Carlo Training...')
+		log.info(f'[{self.__class__.__name__}]: Starting Training...')
 		for episode in range(episodes):
 			self.buffer.reset()
 			# Collect Experience
@@ -61,7 +62,7 @@ class MonteCarloAgent:
 			self.update(states, actions, rewards, learning_rate)
 			# Logging
 			if (episode + 1) % 100 == 0:
-				print("Episode: ", episode + 1)
+				log.info(f"Episode: {episode + 1}")
 	
 	def save(self, path='.', filename='MC-Agent.npy'):
 		np.save(pjoin(path, filename), self.q_table)

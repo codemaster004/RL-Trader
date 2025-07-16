@@ -2,6 +2,7 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 
 import importlib
+import logging as log
 
 
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
@@ -16,7 +17,7 @@ def main(cfg: DictConfig):
 	
 	agent.train(env=env, **cfg.train.params, **cfg.agent.train_params)
 	agent.save(path='saves/')
-	print(agent.q_table)
+	log.info(agent.q_table)
 
 
 if __name__ == "__main__":
