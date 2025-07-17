@@ -19,7 +19,7 @@ def main(cfg: DictConfig):
 	with mlflow.start_run(run_name=cfg.train.run_name):
 		# ML Flow log training params
 		mlflow.log_params(cfg.train.params)
-		
+
 		agent.train(env=env, **cfg.train.params, **cfg.agent.train_params)
 		agent.save(path='saves/')
 	

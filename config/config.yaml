@@ -14,5 +14,6 @@ env:
 train:
   params:
     learning_rate: 0.0001
-    trajectories_per_episode: 5
+    trajectories_per_episode: 20
+    threads_per_episode: 10
     episodes: 5000

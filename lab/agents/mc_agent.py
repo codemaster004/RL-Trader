@@ -3,6 +3,8 @@ from os.path import join as pjoin
 import mlflow
 import numpy as np
 import logging as log
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 from lab.agents.base_agent import BaseAgent
 
@@ -55,12 +57,13 @@ class MonteCarloAgent(BaseAgent):
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env=None, env_fn=None, *args, **kwargs):
-		learning_rate, discounting, episodes, epsilon, trajectories_per_episode, log_step = self._extract_train_kwargs(**kwargs)
+	def train(self, env=None, env_id=None, *args, **kwargs):
+		learning_rate, discounting, episodes, epsilon, trajectories_per_episode, num_threads, log_step = self._extract_train_kwargs(**kwargs)
 		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
 		for episode in range(episodes):
 			self.buffer.reset()
+			
 			# Collect Experience
 			for _ in range(trajectories_per_episode):
 				self._run_episode(env, epsilon)
@@ -82,10 +85,11 @@ class MonteCarloAgent(BaseAgent):
 		disc = kwargs.get('discount', 0.99)
 		epi = kwargs.get('episodes', 1000)
 		eps = kwargs.get('epsilon', 0.2)
-		traj_n_epi = kwargs.get('trajectories_per_episode', 1)
+		traj_n_e = kwargs.get('trajectories_per_episode', 1)
+		thr_n_e = kwargs.get('threads_per_episode', 10)
 		log_step = kwargs.get('log_step', 100)
 
-		return lr, disc, epi, eps, traj_n_epi, log_step
+		return lr, disc, epi, eps, traj_n_e, thr_n_e, log_step
 
 	def save(self, path='.', filename='MC-Agent.npy'):
 		np.save(pjoin(path, filename), self.q_table)

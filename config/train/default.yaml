@@ -5,3 +5,4 @@ params:
   discounting: 0.99
   learning_rate: 0.001
   trajectories_per_episode: 1
+  threads_per_episode: 1
