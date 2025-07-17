@@ -1,6 +1,8 @@
 import gymnasium as gym
 import numpy as np
 
+from lab.envs import Actions
+
 
 class GenerativeEnv(gym.Env):
 	metadata = {"render_modes": ["human"]}
@@ -33,6 +35,7 @@ class GenerativeEnv(gym.Env):
 		self._prices = None
 		
 		self._buy_history = None
+		self._sell_history = None
 	
 	def reset(self, seed=None, options=None):
 		if options is None:
@@ -47,6 +50,7 @@ class GenerativeEnv(gym.Env):
 		# Generate historical data
 		self._prices = self._init_gen_prices(**self.init_options)
 		self._buy_history = {}
+		self._sell_history = {}
 	
 	def step(self, action):
 		self._prices = np.append(self._prices, self._gen_next_price(self._prices[-1], **self.init_options))
@@ -54,18 +58,22 @@ class GenerativeEnv(gym.Env):
 
 		self.terminated = self._is_terminated()
 		self.truncated = self._is_truncated()
-		self.reward = self._calc_reward()
+		self.reward = self._calc_reward(action)
 	
 	def buy(self, amount):
 		self.shares_count += amount
 		self.funds -= amount * self.price
+		self.funds -= amount * self.price * 0.01
+		self._sell_history = {}
 		self._buy_history[self.price] = amount
 	
 	def sell(self, amount):
 		# todo: improve
 		self.shares_count -= amount
 		self.funds += amount * self.price
+		self.funds -= amount * self.price * 0.01
 		self._buy_history = {}
+		self._sell_history[self.price] = amount
 	
 	@property
 	def price(self):
@@ -86,22 +94,34 @@ class GenerativeEnv(gym.Env):
 	def _get_plot_range(self):
 		return range(self.init_options["init_days"], self.init_options["init_days"] + self.current_step)
 
-	def _calc_reward(self):
+	def _calc_reward(self, action=None):
 		# Stock price <= 0, bankrupt
 		if self.truncated:
 			return -100
-		# Small penalty for not being on the market
-		if self.shares_count <= 0:
-			return -1
+		# # Small penalty for not being on the market
+		# if self.shares_count <= 0:
+		# 	return -1
 		# At the end or run, reward is the summ of funds and value of all shares
 		# if self.terminated:
 		# 	return self.funds + self.shares_count * self.price
 		
-		# Reward is the difference between price when bought the stock and current price
-		gain = 0
-		for acquisition_price, amount in self._buy_history.items():
-			gain += (self.price - acquisition_price) * amount
-		return gain
+		reward = 0
+		
+		if action == Actions.BUY.value:
+			reward -= self.price * 0.01
+		if action == Actions.SELL.value:
+			reward -= self.price * 0.01
+		
+		if self.shares_count > 0:
+			# Reward is the difference between price when bought the stock and current price
+			for acquisition_price, amount in self._buy_history.items():
+				reward += self.price - acquisition_price
+		else:
+			# When not on the market reward for not loosing money and penalty for not gaining
+			for sold_price, amount in self._sell_history.items():
+				reward += sold_price - self.price
+		
+		return reward
 
 	def _is_terminated(self):
 		return self.current_step >= self.max_steps

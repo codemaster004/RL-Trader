@@ -90,8 +90,8 @@ class SimpleTrends(GenerativeEnv):
 			trend = 0  # 0: trend-down
 		elif self._short_sma[-1] >= self._long_sma[-1]:
 			trend = 1  # 1: trend-up
-		if abs(self._short_sma[-1] / self._long_sma[-1] - 1) < 0.03:
-			trend = 2  # 2: no-trend
+		# if abs(self._short_sma[-1] / self._long_sma[-1] - 1) < 0.03:
+		# 	trend = 2  # 2: no-trend
 		is_bought = 1 if self.shares_count > 0 else 0
 		return np.array([trend, is_bought])
 	

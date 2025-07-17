@@ -3,6 +3,8 @@ from os.path import join as pjoin
 import numpy as np
 import logging as log
 
+from lab.agents.base_agent import BaseAgent
+
 
 class MCBuffer:
 	def __init__(self):
@@ -26,15 +28,15 @@ class MCBuffer:
 		return self.states, self.actions, self.rewards
 
 
-class MonteCarloAgent:
+class MonteCarloAgent(BaseAgent):
 	def __init__(self, state_dim, action_dim, options=None):
-		self.state_dim = state_dim
-		self.action_dim = action_dim
+		super(MonteCarloAgent, self).__init__(state_dim, action_dim, options)
 
 		self.q_table = np.zeros((*self.state_dim, *self.action_dim))
 		self.buffer = MCBuffer()
 
-	def select_action(self, state, mask, epsilon=0.1):
+	def select_action(self, state, mask, **kwargs):
+		epsilon = kwargs.get('epsilon', 0.1)
 		allowed_indices = np.where(mask)[0]
 		if np.random.random() < epsilon:
 			action = np.random.choice(allowed_indices)
@@ -44,11 +46,17 @@ class MonteCarloAgent:
 
 		return action
 
-	def update(self, states, actions, rewards, alpha):
+	def update(self, *args, **kwargs):
+		states, actions, rewards = args
+		
+		alpha = kwargs.get('alpha', 0.01)
+		
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env, episodes=10_000, discounting=0.9, learning_rate=0.01, trajectories_per_episode=1, epsilon=0.3):
+	def train(self, env=None, env_fn=None, *args, **kwargs):
+		learning_rate, discounting, episodes, epsilon, trajectories_per_episode = self._extract_train_kwargs(**kwargs)
+		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
 		for episode in range(episodes):
 			self.buffer.reset()
@@ -58,12 +66,22 @@ class MonteCarloAgent:
 
 			states, actions, rewards = self.buffer.get()
 			rewards = self._calc_cumsum_rewards(rewards, discounting)
+		
 			# Update Q-table
-			self.update(states, actions, rewards, learning_rate)
+			self.update(states, actions, rewards, alpha=learning_rate)
 			# Logging
 			if (episode + 1) % 100 == 0:
 				log.info(f"Episode: {episode + 1}")
-	
+
+	def _extract_train_kwargs(self, **kwargs):
+		lr = kwargs.get('learning_rate', 0.001)
+		disc = kwargs.get('discount', 0.99)
+		epi = kwargs.get('episodes', 1000)
+		eps = kwargs.get('epsilon', 0.2)
+		traj_n_epi = kwargs.get('trajectories_per_episode', 1)
+
+		return lr, disc, epi, eps, traj_n_epi
+
 	def save(self, path='.', filename='MC-Agent.npy'):
 		np.save(pjoin(path, filename), self.q_table)
 	
