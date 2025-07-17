@@ -7,10 +7,6 @@ defaults:
 
 seed: 1
 
-env:
-  params:
-    simulations_length: 356
-
 train:
   params:
     learning_rate: 0.0001

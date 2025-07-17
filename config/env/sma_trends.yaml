@@ -5,5 +5,12 @@ register_id: SimpleTrends-v0
 state_dim: [3, 2]
 action_dim: [3]
 
-params:
-  simulations_length: 1780
+options:
+  "simulations_length": 1700,
+  "start_price": 100,
+  "funds": 10_000.0,
+  "init_days": 60,
+  "mu": 0.0005,
+  "sigma": 0.01,
+  "short_sma": 12,
+  "long_sma": 60,

@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 class SimpleTrends(GenerativeEnv):
 	metadata = {"render_modes": ["human"]}
 
-	def __init__(self, simulations_length=356):
-		super(SimpleTrends, self).__init__(simulations_length)
+	def __init__(self):
+		super(SimpleTrends, self).__init__()
 		# Parent attributes
 		# 0: Hold, 1: Buy, 2: Sell
 		self.action_space = spaces.Discrete(3)
@@ -24,11 +24,10 @@ class SimpleTrends(GenerativeEnv):
 		self._long_sma = None
 
 	def reset(self, seed=None, options=None):
-		if options is None:
-			options = {
-				"short_sma": 12,
-				"long_sma": 60,
-			}
+		options = options or {
+			"short_sma": 12,
+			"long_sma": 60,
+		}
 
 		super().reset(seed=seed, options=options)
 
@@ -41,7 +40,7 @@ class SimpleTrends(GenerativeEnv):
 
 	def step(self, action):
 		current_price = self.price
-		
+
 		# Check for invalid action
 		if action not in [a.value for a in Actions]:
 			raise ValueError(f"Invalid action: {action}")
@@ -52,7 +51,7 @@ class SimpleTrends(GenerativeEnv):
 
 		# Proceed with environment dynamics
 		super().step(action=action)
-		
+
 		if action == Actions.HOLD.value:
 			pass
 		elif action == Actions.BUY.value:
@@ -66,7 +65,7 @@ class SimpleTrends(GenerativeEnv):
 		# Update to Simple Moving Avg
 		self._short_sma = np.append(self._short_sma, self._calc_new_sma(self._prices, self.init_options["short_sma"]))
 		self._long_sma = np.append(self._long_sma, self._calc_new_sma(self._prices, self.init_options["long_sma"]))
-		
+
 		self.state = self._determine_state()
 		self.info = self._get_info()
 
@@ -74,10 +73,11 @@ class SimpleTrends(GenerativeEnv):
 
 	def render(self):
 		log.info(f"{self.funds=}, {self.shares_count=}, {self.price=}")
-	
+
 	def plot(self, ax):
 		super().plot(ax=ax)
-		ax.plot(self._short_sma[self._get_plot_range()], label=f"Short SMA ({self.init_options['short_sma']})", linestyle='-')
+		ax.plot(self._short_sma[self._get_plot_range()], label=f"Short SMA ({self.init_options['short_sma']})",
+		        linestyle='-')
 		ax.plot(self._long_sma[self._get_plot_range()], label=f"Long SMA ({self.init_options['long_sma']})")
 
 	def close(self):
@@ -85,7 +85,7 @@ class SimpleTrends(GenerativeEnv):
 
 	def _get_info(self):
 		return {"action_mask": np.array([True, self.funds > self._prices[-1], self.shares_count > 1])}
-	
+
 	def _determine_state(self):
 		trend = 2
 		if self._short_sma[-1] < self._long_sma[-1]:
@@ -96,7 +96,7 @@ class SimpleTrends(GenerativeEnv):
 		# 	trend = 2  # 2: no-trend
 		is_bought = 1 if self.shares_count > 0 else 0
 		return np.array([trend, is_bought])
-	
+
 	@staticmethod
 	def _init_calc_sma(prices: np.ndarray, window: int = 5):
 		return np.concatenate([

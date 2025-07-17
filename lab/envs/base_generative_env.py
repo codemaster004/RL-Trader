@@ -7,16 +7,17 @@ from lab.envs import Actions
 class GenerativeEnv(gym.Env):
 	metadata = {"render_modes": ["human"]}
 	
-	def __init__(self, simulations_length=356):
+	def __init__(self):
 		super(GenerativeEnv, self).__init__()
 
 		# Custom attributes
-		self.max_steps = simulations_length
+		self.max_steps = 0
 		self.current_step = 0
 		
 		self.funds = 0
 		self.shares_count = 0
 		self.init_options = {
+			"simulations_length": 356,
 			"start_price": 100,
 			"funds": 10_000.0,
 			"init_days": 60,
@@ -38,13 +39,13 @@ class GenerativeEnv(gym.Env):
 		self._sell_history = None
 	
 	def reset(self, seed=None, options=None):
-		if options is None:
-			options = {}
-		super().reset(seed=seed)
+		options = options or {}
+		super().reset(seed=seed, options=None)  # Passing none, since the base method does not require any
 
 		self.init_options.update(options)
 		self.funds = self.init_options["funds"]
 		
+		self.max_steps = self.init_options["simulations_length"]
 		self.current_step = 0
 		
 		# Generate historical data
