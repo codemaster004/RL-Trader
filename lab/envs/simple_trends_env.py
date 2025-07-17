@@ -4,7 +4,9 @@ import numpy as np
 from lab.envs.base_generative_env import GenerativeEnv
 from lab.envs._common import Actions
 
-import logging as log
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class SimpleTrends(GenerativeEnv):

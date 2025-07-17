@@ -1,3 +1,5 @@
+run_name: TrainRun-0
+
 params:
   episodes: 10_000
   discounting: 0.99

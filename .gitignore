@@ -17,3 +17,6 @@ outputs/
 
 # Test coverage information file
 .coverage
+
+# Ignore ML Flow directory
+mlruns/

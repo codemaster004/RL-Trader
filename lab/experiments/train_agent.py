@@ -1,4 +1,5 @@
 import hydra
+import mlflow
 from omegaconf import DictConfig, OmegaConf
 
 import importlib
@@ -15,10 +16,13 @@ def main(cfg: DictConfig):
 	# Dynamic load of Agent class
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 	
-	agent.train(env=env, **cfg.train.params, **cfg.agent.train_params)
-	agent.save(path='saves/')
-	log.info(agent.q_table)
-
+	with mlflow.start_run(run_name=cfg.train.run_name):
+		# ML Flow log training params
+		mlflow.log_params(cfg.train.params)
+		
+		agent.train(env=env, **cfg.train.params, **cfg.agent.train_params)
+		agent.save(path='saves/')
+	
 
 if __name__ == "__main__":
 	main()

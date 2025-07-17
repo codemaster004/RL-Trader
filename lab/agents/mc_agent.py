@@ -1,5 +1,6 @@
 from os.path import join as pjoin
 
+import mlflow
 import numpy as np
 import logging as log
 
@@ -55,7 +56,7 @@ class MonteCarloAgent(BaseAgent):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
 	def train(self, env=None, env_fn=None, *args, **kwargs):
-		learning_rate, discounting, episodes, epsilon, trajectories_per_episode = self._extract_train_kwargs(**kwargs)
+		learning_rate, discounting, episodes, epsilon, trajectories_per_episode, log_step = self._extract_train_kwargs(**kwargs)
 		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
 		for episode in range(episodes):
@@ -69,9 +70,12 @@ class MonteCarloAgent(BaseAgent):
 		
 			# Update Q-table
 			self.update(states, actions, rewards, alpha=learning_rate)
+			
 			# Logging
-			if (episode + 1) % 100 == 0:
-				log.info(f"Episode: {episode + 1}")
+			episode_avg_reward = float(np.mean(rewards))
+			mlflow.log_metric("avg_reward", episode_avg_reward, step=episode)
+			if (episode + 1) % log_step == 0:
+				log.info(f"Episode: {episode + 1}, avg reward: {episode_avg_reward}")
 
 	def _extract_train_kwargs(self, **kwargs):
 		lr = kwargs.get('learning_rate', 0.001)
@@ -79,8 +83,9 @@ class MonteCarloAgent(BaseAgent):
 		epi = kwargs.get('episodes', 1000)
 		eps = kwargs.get('epsilon', 0.2)
 		traj_n_epi = kwargs.get('trajectories_per_episode', 1)
+		log_step = kwargs.get('log_step', 100)
 
-		return lr, disc, epi, eps, traj_n_epi
+		return lr, disc, epi, eps, traj_n_epi, log_step
 
 	def save(self, path='.', filename='MC-Agent.npy'):
 		np.save(pjoin(path, filename), self.q_table)

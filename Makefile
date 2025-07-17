@@ -3,6 +3,9 @@ PYTHON_BASE := python3
 PYTHON := .venv/bin/python
 
 
+run_mlflow:
+	source $(VENV_DIR)/bin/activate && mlflow ui
+
 eval_agent:
 	$(PYTHON) -m lab.experiments.eval_agent
 
