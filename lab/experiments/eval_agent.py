@@ -1,4 +1,5 @@
 import importlib
+import logging as log
 
 import hydra
 import numpy as np
@@ -7,13 +8,10 @@ from omegaconf import DictConfig
 
 from lab.envs import Actions
 
-import logging as log
+import scipy.stats as stats
 
 
 def eval_agent(env, agent):
-	state, info = env.reset()
-	mask = info['action_mask']
-
 	log.info("Starting Evaluation")
 	log.info("Agent Strategy:")
 	agent.q_table[agent.q_table == 0.0] = float('-inf')
@@ -25,25 +23,44 @@ def eval_agent(env, agent):
 	TrendUp & HasShares: {Actions(np.argmax(agent.q_table[1, 1])).name}
 	""")
 
-	agent_buy_actions = []
-	agent_sell_actions = []
-
-	done = False
-	while not done:
-		action = agent.select_action(state, mask, epsilon=0)
-		if action == Actions.BUY.value:
-			agent_buy_actions.append(env.current_step)
-			# log.info(f'BUY at {round(env.price, 2)}')
-		elif action == Actions.SELL.value:
-			agent_sell_actions.append(env.current_step)
-			# log.info(f'SELL at {round(env.price, 2)}')
-
-		state, reward, terminated, truncated, info = env.step(action)
+	returns = []
+	for i in range(10_000):
+		state, info = env.reset()
 		mask = info['action_mask']
-		done = terminated or truncated
 
-	env.sell(env.shares_count)
-
+		agent_buy_actions = []
+		agent_sell_actions = []
+		
+		done = False
+		while not done:
+			action = agent.select_action(state, mask, epsilon=0)
+			if action == Actions.BUY.value:
+				agent_buy_actions.append(env.current_step)
+				# log.info(f'BUY at {round(env.price, 2)}')
+			elif action == Actions.SELL.value:
+				agent_sell_actions.append(env.current_step)
+				# log.info(f'SELL at {round(env.price, 2)}')
+	
+			state, reward, terminated, truncated, info = env.step(action)
+			mask = info['action_mask']
+			done = terminated or truncated
+	
+		env.sell(env.shares_count)
+		returns.append(env.funds - 10_000)
+	
+	returns = np.array(returns)
+	mean = np.mean(returns)
+	std = np.std(returns)
+	
+	z = (0 - mean) / std
+	print(stats.norm.cdf(z))
+	
+	plt.hist(returns, bins=50, label='Returns')
+	plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {mean:.2f}')
+	plt.title("Return from 2y of trading a single random stock")
+	plt.legend()
+	plt.show()
+	
 	fig, ax = plt.subplots(figsize=(10, 5))
 	env.plot(ax=ax)
 
@@ -63,7 +80,7 @@ def eval_agent(env, agent):
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
 	# Dynamic load of Env and Agent classes
-	env = getattr(importlib.import_module(cfg.env.type), cfg.env.name)(**cfg.env.params)
+	env = getattr(importlib.import_module(cfg.env.type), cfg.env.name)()
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 
 	agent.load(path='saves')

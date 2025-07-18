@@ -17,7 +17,7 @@ class GenerativeEnv(gym.Env):
 		self.funds = 0
 		self.shares_count = 0
 		self.init_options = {
-			"simulations_length": 356,
+			"simulations_length": 670,
 			"start_price": 100,
 			"funds": 10_000.0,
 			"init_days": 60,

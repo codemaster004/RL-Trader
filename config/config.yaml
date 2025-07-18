@@ -8,6 +8,7 @@ defaults:
 seed: 1
 
 train:
+  run_name: MCAgent_SimpleTrends_Run-1
   params:
     learning_rate: 0.0001
     trajectories_per_episode: 20
