@@ -84,7 +84,7 @@ class GenerativeEnv(gym.Env):
 		return self._prices[self._get_plot_range()]
 	
 	def plot(self, ax):
-		ax.plot(self._prices[self._get_plot_range()], label="price", marker=".")
+		ax.plot(self._prices[self._get_plot_range()], label="price")
 	
 	def _determine_state(self):
 		raise NotImplementedError  # Must be overwritten

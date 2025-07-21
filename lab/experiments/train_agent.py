@@ -15,7 +15,7 @@ def main(cfg: DictConfig):
 	
 	# Dynamic load of Agent class
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
-	
+	print(agent.q_table)
 	with mlflow.start_run(run_name=cfg.train.run_name):
 		# ML Flow log training params
 		mlflow.log_params(cfg.train.params)

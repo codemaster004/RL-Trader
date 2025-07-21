@@ -24,7 +24,7 @@ def eval_agent(env, agent):
 	""")
 
 	returns = []
-	for i in range(10_000):
+	for i in range(100):
 		state, info = env.reset()
 		mask = info['action_mask']
 
@@ -48,26 +48,26 @@ def eval_agent(env, agent):
 		env.sell(env.shares_count)
 		returns.append(env.funds - 10_000)
 	
-	returns = np.array(returns)
+	returns = np.array(returns) / 10_000 * 100
 	mean = np.mean(returns)
 	std = np.std(returns)
-	
 	z = (0 - mean) / std
-	print(stats.norm.cdf(z))
 	
-	plt.hist(returns, bins=50, label='Returns')
-	plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {mean:.2f}')
-	plt.title("Return from 2y of trading a single random stock")
-	plt.legend()
-	plt.show()
+	print(f"{mean=:.2f} +/- {std=:.2f}")
+	print(stats.norm.cdf(z))
+	# plt.hist(returns, bins=50, label='Returns')
+	# plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {mean:.2f}%')
+	# plt.title("Return from 2y of trading a single random stock")
+	# plt.legend()
+	# plt.show()
 	
 	fig, ax = plt.subplots(figsize=(10, 5))
 	env.plot(ax=ax)
 
-	ax.scatter(agent_buy_actions, env.get_prices()[agent_buy_actions] - 0.3, marker="^", color="seagreen", label="Buy",
-	           zorder=5)
-	ax.scatter(agent_sell_actions, env.get_prices()[agent_sell_actions] + 0.3, marker="v", color="firebrick",
-	           label="Sell", zorder=5)
+	ax.scatter(agent_buy_actions, env.get_prices()[agent_buy_actions] - 1, s=50.0,
+	           marker="^", color="seagreen", label="Buy", zorder=5)
+	ax.scatter(agent_sell_actions, env.get_prices()[agent_sell_actions] + 1, s=30,
+	           marker="v", color="firebrick", label="Sell", zorder=5)
 
 	plt.title(f"Single Agent Run: {int(env.funds)}")
 	plt.grid(True)
