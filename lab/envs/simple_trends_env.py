@@ -18,16 +18,18 @@ class SimpleTrends(GenerativeEnv):
 		# 0: Hold, 1: Buy, 2: Sell
 		self.action_space = spaces.Discrete(3)
 		# 0: trend-down, 1: trend-up, 2: chop
-		self.observation_space = spaces.MultiDiscrete([3, 2], dtype=np.int32)
+		self.observation_space = spaces.MultiDiscrete([2, 2], dtype=np.int32)
 		# Protected
 		self._short_sma = None
 		self._long_sma = None
 
 	def reset(self, seed=None, options=None):
-		options = options or {
+		default_options = {
 			"short_sma": 12,
 			"long_sma": 60,
 		}
+		options = options or {}
+		options = {**default_options, **options}
 
 		super().reset(seed=seed, options=options)
 

@@ -15,8 +15,5 @@ train_agent:
 train_vae:
 	$(PYTHON) -m lab.train.train_vae
 
-run_download_data:
-	$(PYTHON) scripts/download_stock_data.py
-
-run_prep_data:
-	$(PYTHON) scripts/collect_stock_img_data.py
+run_prep_ticker_history:
+	$(PYTHON) scripts/download_stock_data.py && $(PYTHON) scripts/collect_stock_img_data.py

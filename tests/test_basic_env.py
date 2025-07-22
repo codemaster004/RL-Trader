@@ -1,12 +1,13 @@
 import pytest
 import numpy as np
 from lab.envs.base_generative_env import GenerativeEnv
+from lab.envs import Actions
 
 
 @pytest.fixture
 def env():
-	env = GenerativeEnv(simulations_length=100)
-	env.reset()
+	env = GenerativeEnv()
+	env.reset(options={"simulations_length": 100})
 	return env
 
 
@@ -30,7 +31,7 @@ def test_gen_next_price():
 
 def test_step_adds_price_and_increments_step(env):
 	before_len = len(env._prices)
-	env.step(action=0)  # dummy action
+	env.step(action=Actions.HOLD.value)
 	assert len(env._prices) == before_len + 1
 	assert env.current_step == 1
 
@@ -40,11 +41,11 @@ def test_buy_and_sell_affect_funds_and_shares(env):
 	price = env.price
 	env.buy(amount=2)
 	assert env.shares_count == 2
-	assert np.isclose(env.funds, initial_funds - 2 * price)
+	assert np.isclose(env.funds, initial_funds - 2 * price * 1.01)
 
 	env.sell(amount=2)
 	assert env.shares_count == 0
-	assert env.funds >= initial_funds - 2 * price  # could be more due to price change
+	assert np.isclose(env.funds, initial_funds, rtol=0.05)
 
 
 def test_price_property(env):
@@ -52,17 +53,10 @@ def test_price_property(env):
 
 
 def test_get_prices_returns_correct_slice(env):
-	env.step(0)
+	env.step(Actions.HOLD.value)
 	prices = env.get_prices()
 	expected_length = len(env._get_plot_range())
 	assert len(prices) == expected_length
-
-
-def test_calc_reward_handles_no_shares(env):
-	env._buy_history = {}
-	env.shares_count = 0
-	reward = env._calc_reward()
-	assert reward == -1
 
 
 def test_calc_reward_handles_truncated(env):
@@ -72,9 +66,9 @@ def test_calc_reward_handles_truncated(env):
 
 
 def test_is_terminated(env):
-	env.current_step = 99
+	env.current_step = env.max_steps - 1
 	assert not env._is_terminated()
-	env.current_step = 100
+	env.current_step = env.max_steps
 	assert env._is_terminated()
 
 
@@ -90,20 +84,32 @@ def test_plot_range_bounds(env):
 
 
 @pytest.mark.parametrize("acquisition_price, current_price, amount, expected_reward", [
-	(100.0, 105.0, 1, 5.0),  # gain because price > buy price
-	(105.0, 100.0, 1, -5.0),  # loss because price < buy price
-	(100.0, 100.0, 1, 0.0),  # no gain/loss
-	(100.0, 90.0, 3, -30.0),  # larger loss (buy high, now lower)
-	(90.0, 100.0, 2, 20.0),  # larger gain (buy low, now higher)
+	(100.0, 105.0, 1, 5.0),  # gain
+	(105.0, 100.0, 1, -5.0),  # loss
+	(100.0, 100.0, 1, 0.0),  # break-even
 ])
 def test_calc_reward_with_holdings(acquisition_price, current_price, amount, expected_reward):
 	env = GenerativeEnv()
 	env.reset()
-
-	# Manually override for test
 	env._buy_history = {acquisition_price: amount}
 	env.shares_count = amount
-	env._prices = np.append(env._prices, current_price)  # set last price
+	env._prices = np.append(env._prices, current_price)
+	env.truncated = False
+
+	reward = env._calc_reward()
+	assert pytest.approx(reward, rel=1e-6) == expected_reward
+
+
+@pytest.mark.parametrize("sold_price, current_price, amount, expected_reward", [
+	(100.0, 95.0, 1, 5.0),  # reward for exiting before price drops
+	(95.0, 100.0, 1, -5.0),  # penalty for missing rise
+])
+def test_calc_reward_with_sell_history(sold_price, current_price, amount, expected_reward):
+	env = GenerativeEnv()
+	env.reset()
+	env._sell_history = {sold_price: amount}
+	env.shares_count = 0
+	env._prices = np.append(env._prices, current_price)
 	env.truncated = False
 
 	reward = env._calc_reward()

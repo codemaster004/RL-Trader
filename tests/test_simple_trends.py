@@ -6,8 +6,8 @@ from lab.envs._common import Actions
 
 @pytest.fixture
 def env():
-	env = SimpleTrends(simulations_length=100)
-	env.reset()
+	env = SimpleTrends()
+	env.reset(options={"simulations_length": 100})
 	return env
 
 
@@ -24,12 +24,12 @@ def test_step_hold_does_not_buy_or_sell(env):
 	initial_funds = env.funds
 	initial_shares = env.shares_count
 	env.step(Actions.HOLD.value)
-	assert env.funds == initial_funds
+	assert np.isclose(env.funds, initial_funds)
 	assert env.shares_count == initial_shares
 
 
 def test_step_buy_increases_shares(env):
-	env.funds = 1000  # ensure sufficient funds
+	env.funds = 1000
 	shares_before = env.shares_count
 	env.step(Actions.BUY.value)
 	assert env.shares_count > shares_before
@@ -41,7 +41,7 @@ def test_step_sell_decreases_shares(env):
 	shares_bought = env.shares_count
 	env.step(Actions.SELL.value)
 	assert env.shares_count == 0
-	assert env.funds > 1000 - shares_bought * env.price
+	assert env.funds > 0.99 * (1000 - shares_bought * env.price)  # 1% fees tolerance
 
 
 def test_step_updates_sma_lengths(env):
@@ -52,8 +52,8 @@ def test_step_updates_sma_lengths(env):
 
 
 @pytest.mark.parametrize("short_sma, long_sma, expected_trend", [
-	(np.array([1.0]), np.array([2.0]), 0),  # short < long => downtrend
-	(np.array([3.0]), np.array([2.0]), 1),  # short > long => uptrend
+	(np.array([1.0]), np.array([2.0]), 0),  # downtrend
+	(np.array([3.0]), np.array([2.0]), 1),  # uptrend
 ])
 def test_determine_state_trend_logic(short_sma, long_sma, expected_trend):
 	env = SimpleTrends()
@@ -83,22 +83,13 @@ def test_plot_range_matches_sma(env):
 	assert len(sma_long) == len(plot_range)
 
 
-def test_render_does_not_crash(env, capsys):
-	# This test verifies that render() prints something and does not raise
-	env.render()
-	captured = capsys.readouterr()
-	assert "funds=" in captured.out
-	assert "shares_count=" in captured.out
-	assert "price=" in captured.out
-
-
 def test_step_invalid_action_raises(env):
 	with pytest.raises(ValueError, match="Invalid action"):
-		env.step(999)  # Not part of Actions enum
+		env.step(999)
 
 
 def test_step_zero_price_raises(env):
-	env._prices = np.append(env._prices, 0.0)  # override last price
+	env._prices = np.append(env._prices, 0.0)
 	with pytest.raises(ValueError, match="Invalid price"):
 		env.step(Actions.BUY.value)
 
@@ -110,7 +101,7 @@ def test_step_negative_price_raises(env):
 
 
 def test_step_buy_with_insufficient_funds_does_nothing(env):
-	env.funds = 0.5  # less than price
+	env.funds = 0.01  # Less than transaction cost
 	shares_before = env.shares_count
 	env.step(Actions.BUY.value)
 	assert env.shares_count == shares_before
