@@ -11,7 +11,7 @@ from lab.envs import Actions
 import scipy.stats as stats
 
 
-def eval_agent(env, agent):
+def eval_agent(env, agent, cfg):
 	log.info("Starting Evaluation")
 	log.info("Agent Strategy:")
 	agent.q_table[agent.q_table == 0.0] = float('-inf')
@@ -24,8 +24,8 @@ def eval_agent(env, agent):
 	""")
 
 	returns = []
-	for i in range(100):
-		state, info = env.reset()
+	for i in range(1000):
+		state, info = env.reset(options=cfg.env.options)
 		mask = info['action_mask']
 
 		agent_buy_actions = []
@@ -48,19 +48,6 @@ def eval_agent(env, agent):
 		env.sell(env.shares_count)
 		returns.append(env.funds - 10_000)
 	
-	returns = np.array(returns) / 10_000 * 100
-	mean = np.mean(returns)
-	std = np.std(returns)
-	z = (0 - mean) / std
-	
-	print(f"{mean=:.2f} +/- {std=:.2f}")
-	print(stats.norm.cdf(z))
-	# plt.hist(returns, bins=50, label='Returns')
-	# plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {mean:.2f}%')
-	# plt.title("Return from 2y of trading a single random stock")
-	# plt.legend()
-	# plt.show()
-	
 	fig, ax = plt.subplots(figsize=(10, 5))
 	env.plot(ax=ax)
 
@@ -76,6 +63,19 @@ def eval_agent(env, agent):
 	plt.show()
 	plt.show()
 
+	returns = np.array(returns) / 10_000 * 100
+	mean = np.mean(returns)
+	std = np.std(returns)
+	z = (0 - mean) / std
+
+	print(f"{mean=:.2f} +/- {std=:.2f}")
+	print(stats.norm.cdf(z))
+	plt.hist(returns, bins=50, label='Returns')
+	plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean = {mean:.2f}%')
+	plt.title("Return from 2y of trading a single random stock")
+	plt.legend()
+	plt.show()
+
 
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
@@ -83,8 +83,8 @@ def main(cfg: DictConfig):
 	env = getattr(importlib.import_module(cfg.env.type), cfg.env.name)()
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 
-	agent.load(path='saves', filename='MC-Agent-BuyHold.npy')
-	eval_agent(env, agent)
+	agent.load(path='saves', filename='MC-Agent.npy')
+	eval_agent(env, agent, cfg=cfg)
 
 
 if __name__ == '__main__':
