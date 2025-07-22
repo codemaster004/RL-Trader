@@ -83,7 +83,7 @@ def main(cfg: DictConfig):
 	env = getattr(importlib.import_module(cfg.env.type), cfg.env.name)()
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 
-	agent.load(path='saves')
+	agent.load(path='saves', filename='MC-Agent-BuyHold.npy')
 	eval_agent(env, agent)
 
 

@@ -20,7 +20,7 @@ def main(cfg: DictConfig):
 		# ML Flow log training params
 		mlflow.log_params(cfg.train.params)
 
-		agent.train(env_id=cfg.env.register_id, **cfg.train.params, **cfg.agent.train_params)
+		agent.train(env_id=cfg.env.register_id, env_options=cfg.env.options, **cfg.train.params, **cfg.agent.train_params)
 		agent.save(path='saves/')
 	
 

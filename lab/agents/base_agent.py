@@ -17,7 +17,7 @@ class BaseAgent(ABC):
 		pass
 
 	@abstractmethod
-	def train(self, env=None, env_id=None, *args, **kwargs):
+	def train(self, env=None, env_id=None, env_options=None, *args, **kwargs):
 		pass
 	
 	@abstractmethod

@@ -1,0 +1,8 @@
+
+options:
+  simulations_length: 1700
+  start_price: 100
+  funds: 10_000.0
+  init_days: 60
+  mu: 0.0005
+  sigma: 0.01

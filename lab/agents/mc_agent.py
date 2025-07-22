@@ -38,6 +38,8 @@ class MonteCarloAgent(BaseAgent):
 		self.q_table = np.zeros((*self.state_dim, *self.action_dim))
 		self.buffer = MCBuffer()
 
+		self.env_options = None
+
 	def select_action(self, state, mask, **kwargs):
 		epsilon = kwargs.get('epsilon', 0.1)
 		allowed_indices = np.where(mask)[0]
@@ -57,14 +59,23 @@ class MonteCarloAgent(BaseAgent):
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env=None, env_id=None, *args, **kwargs):
-		learning_rate, discounting, episodes, epsilon, trajectories_per_episode, num_threads, log_step = self._extract_train_kwargs(
-			**kwargs)
+	def train(self, env=None, env_id=None, env_options=None, *args, **kwargs):
+		self.env_options = env_options
+		(
+			learning_rate,
+			discounting,
+			episodes,
+			epsilon,
+			trajectories_per_episode,
+			num_threads,
+			log_step
+		) = self._extract_train_kwargs(**kwargs)
+		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
 		with Pool(num_threads) as pool:
 			for episode in range(episodes):
 				self.buffer.reset()
-				
+
 				args = [(env_id, epsilon) for _ in range(trajectories_per_episode)]
 				results = pool.starmap(self._run_episode_worker, args)
 
@@ -76,10 +87,10 @@ class MonteCarloAgent(BaseAgent):
 				# Collect Experience
 				# for _ in range(trajectories_per_episode):
 				# 	self._run_episode(env, epsilon)
-	
+
 				# Update Q-table
 				self.update(states, actions, rewards, alpha=learning_rate)
-	
+
 				# Logging
 				episode_avg_reward = float(np.mean(rewards))
 				mlflow.log_metric("avg_reward", episode_avg_reward, step=episode)
@@ -87,7 +98,7 @@ class MonteCarloAgent(BaseAgent):
 					log.info(f"Episode: {episode + 1}, avg reward: {episode_avg_reward}")
 
 	def _run_episode(self, env, epsilon):
-		state, info = env.reset()
+		state, info = env.reset(options=self.env_options)
 		mask = info['action_mask']
 
 		done = False
@@ -100,13 +111,13 @@ class MonteCarloAgent(BaseAgent):
 			state = next_state
 
 			done = terminated or truncated
-		
+
 		return self.buffer.get()
-	
+
 	def _run_episode_worker(self, env_id, epsilon):
 		env = gym.make(env_id)
 		return self._run_episode(env, epsilon)
-	
+
 	def _extract_train_kwargs(self, **kwargs):
 		lr = kwargs.get('learning_rate', 0.001)
 		disc = kwargs.get('discount', 0.99)
