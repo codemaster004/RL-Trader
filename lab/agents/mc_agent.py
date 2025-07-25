@@ -52,50 +52,40 @@ class MonteCarloAgent(BaseAgent):
 		return action
 
 	def update(self, *args, **kwargs):
-		states, actions, rewards = args
 
 		alpha = kwargs.get('alpha', 0.01)
-
+		states, actions, rewards = args
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env=None, env_id=None, env_options=None, *args, **kwargs):
+	def train(self, env=None, env_options=None, *args, **kwargs):
 		self.env_options = env_options
 		(
 			learning_rate,
 			discounting,
 			episodes,
 			epsilon,
-			trajectories_per_episode,
 			num_threads,
 			log_step
 		) = self._extract_train_kwargs(**kwargs)
 		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
-		with Pool(num_threads) as pool:
-			for episode in range(episodes):
-				self.buffer.reset()
+		for episode in range(episodes):
+			env.reset()
+			self.buffer.reset()
 
-				args = [(env_id, epsilon) for _ in range(trajectories_per_episode)]
-				results = pool.starmap(self._run_episode_worker, args)
+			# Collect Experience
+			states, actions, rewards = self._run_episode(env, epsilon)
+			rewards = self._calc_cumsum_rewards(rewards, discounting)
 
-				states, actions, rewards = [], [], []
-				for s, a, r in results:
-					states += s
-					actions += a
-					rewards += self._calc_cumsum_rewards(r, discounting)
-				# Collect Experience
-				# for _ in range(trajectories_per_episode):
-				# 	self._run_episode(env, epsilon)
+			# Update Q-table
+			self.update(states, actions, rewards, alpha=learning_rate)
 
-				# Update Q-table
-				self.update(states, actions, rewards, alpha=learning_rate)
-
-				# Logging
-				episode_avg_reward = float(np.mean(rewards))
-				mlflow.log_metric("avg_reward", episode_avg_reward, step=episode)
-				if (episode + 1) % log_step == 0:
-					log.info(f"Episode: {episode + 1}, avg reward: {episode_avg_reward}")
+			# Logging
+			episode_avg_reward = float(np.mean(rewards))
+			mlflow.log_metric("avg_reward", episode_avg_reward, step=episode)
+			if (episode + 1) % log_step == 0:
+				log.info(f"Episode: {episode + 1}, avg reward: {episode_avg_reward}")
 
 	def _run_episode(self, env, epsilon):
 		state, info = env.reset(options=self.env_options)
@@ -114,20 +104,15 @@ class MonteCarloAgent(BaseAgent):
 
 		return self.buffer.get()
 
-	def _run_episode_worker(self, env_id, epsilon):
-		env = gym.make(env_id)
-		return self._run_episode(env, epsilon)
-
 	def _extract_train_kwargs(self, **kwargs):
 		lr = kwargs.get('learning_rate', 0.001)
 		disc = kwargs.get('discount', 0.99)
 		epi = kwargs.get('episodes', 1000)
 		eps = kwargs.get('epsilon', 0.2)
-		traj_n_e = kwargs.get('trajectories_per_episode', 1)
 		thr_n_e = kwargs.get('threads_per_episode', 10)
 		log_step = kwargs.get('log_step', 100)
 
-		return lr, disc, epi, eps, traj_n_e, thr_n_e, log_step
+		return lr, disc, epi, eps, thr_n_e, log_step
 
 	def save(self, path='.', filename='MC-Agent.npy'):
 		np.save(pjoin(path, filename), self.q_table)
