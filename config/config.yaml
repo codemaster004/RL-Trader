@@ -2,20 +2,37 @@ defaults:
   - env: sma_trends
   - agent: mc_agent
   - train: default
+  - tuning: optuna
   - _self_
   - override hydra/job_logging: custom
 
 seed: 1
 
+experiment:
+  name: Sweep
+
 train:
-  run_name: MCAgent_SimpleTrends_Run-2
+  run_name: MiniRun
   params:
     learning_rate: 0.0001
     trajectories_per_episode: 10
     threads_per_episode: 10
-    episodes: 5000
+    episodes: 3000
 
 env:
   options:
-    simulations_length: 1000
+    simulations_length: 700
+    init_days: 120
     mu: 0.0005
+
+tuning:
+  n_trials: 10
+  search_space:
+    env.options.short_sma:
+      type: int
+      min: 5
+      max: 29
+    env.options.long_sma:
+      type: int
+      min: 30
+      max: 120

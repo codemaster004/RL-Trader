@@ -12,7 +12,7 @@ class GenerativeEnv(gym.Env):
 
 		# Custom attributes
 		self.max_steps = 0
-		self.current_step = 0
+		self._current_step = 0
 		
 		self.funds = 0
 		self.shares_count = 0
@@ -46,7 +46,7 @@ class GenerativeEnv(gym.Env):
 		self.funds = self.init_options["funds"]
 		
 		self.max_steps = self.init_options["simulations_length"]
-		self.current_step = 0
+		self._current_step = 0
 		
 		# Generate historical data
 		self._prices = self._init_gen_prices(**self.init_options)
@@ -55,7 +55,7 @@ class GenerativeEnv(gym.Env):
 	
 	def step(self, action):
 		self._prices = np.append(self._prices, self._gen_next_price(self._prices[-1], **self.init_options))
-		self.current_step += 1
+		self._current_step += 1
 
 		self.terminated = self._is_terminated()
 		self.truncated = self._is_truncated()
@@ -79,6 +79,10 @@ class GenerativeEnv(gym.Env):
 	@property
 	def price(self):
 		return self._prices[-1]
+	
+	@property
+	def current_step(self):
+		return self._current_step
 	
 	def get_prices(self):
 		return self._prices[self._get_plot_range()]

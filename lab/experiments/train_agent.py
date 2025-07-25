@@ -13,7 +13,7 @@ mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"
 
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
-	mlflow.set_experiment("")
+	mlflow.set_experiment(f"{cfg.env.name}-{cfg.agent.name}-{cfg.experiment.name}")
 	
 	# Load Agent and Env classes
 	env = gym.make(cfg.env.register_id)

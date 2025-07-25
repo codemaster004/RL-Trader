@@ -5,12 +5,13 @@ LABEL authors="filip"
 RUN apt-get update
 WORKDIR /app
 
-# Copy required files
+# Install Requirements
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy project files
 COPY ./lab ./lab
 COPY ./config ./config
-COPY ./requirements.txt .
-
-RUN pip install -r requirements.txt
 
 # Expose MLflow UI port
 #EXPOSE 5000

@@ -25,29 +25,29 @@ def eval_agent(env, agent, cfg, show=False):
 		""")
 
 	returns = []
+	agent_buy_actions = []
+	agent_sell_actions = []
 	for i in range(1_000):
 		state, info = env.reset(options=cfg.env.options)
 		mask = info['action_mask']
-
-		agent_buy_actions = []
-		agent_sell_actions = []
 		
 		done = False
 		while not done:
 			action = agent.select_action(state, mask, epsilon=0)
-			if action == Actions.BUY.value:
-				agent_buy_actions.append(env.current_step)
-				# log.info(f'BUY at {round(env.price, 2)}')
-			elif action == Actions.SELL.value:
-				agent_sell_actions.append(env.current_step)
-				# log.info(f'SELL at {round(env.price, 2)}')
+			if show:
+				if action == Actions.BUY.value:
+					agent_buy_actions.append(env.unwrapped.current_step)
+					# log.info(f'BUY at {round(env.price, 2)}')
+				elif action == Actions.SELL.value:
+					agent_sell_actions.append(env.unwrapped.current_step)
+					# log.info(f'SELL at {round(env.price, 2)}')
 	
 			state, reward, terminated, truncated, info = env.step(action)
 			mask = info['action_mask']
 			done = terminated or truncated
 	
-		env.sell(env.shares_count)
-		returns.append(env.funds - 10_000)
+		env.unwrapped.sell(env.unwrapped.shares_count)
+		returns.append(env.unwrapped.funds - 10_000)
 	
 	if show:
 		fig, ax = plt.subplots(figsize=(10, 5))
@@ -66,10 +66,11 @@ def eval_agent(env, agent, cfg, show=False):
 		plt.show()
 
 	returns = np.array(returns) / 10_000 * 100
-	mean = np.mean(returns)
-	std = np.std(returns)
-	print(f"{mean=:.2f} +/- {std=:.2f}")
-	print(f"lost money: {stats.norm.cdf((0 - mean) / std) * 100}% of time")
+	mean = float(np.mean(returns))
+	std = float(np.std(returns))
+	if show:
+		print(f"{mean=:.2f} +/- {std=:.2f}")
+		print(f"lost money: {stats.norm.cdf((0 - mean) / std) * 100:.2f}% of time")
 	
 	if show:
 		plt.hist(returns, bins=50, label='Returns')
@@ -77,6 +78,8 @@ def eval_agent(env, agent, cfg, show=False):
 		plt.title("Return from 2y of trading a single random stock")
 		plt.legend()
 		plt.show()
+	
+	return mean
 
 
 @hydra.main(config_path="../../config/", config_name="config", version_base="1.3")
@@ -86,7 +89,7 @@ def main(cfg: DictConfig):
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 
 	agent.load(path='saves', filename='MC-Agent.npy')
-	eval_agent(env, agent, cfg=cfg)
+	eval_agent(env, agent, cfg=cfg, show=False)
 
 
 if __name__ == '__main__':

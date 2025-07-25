@@ -17,3 +17,6 @@ train_vae:
 
 run_prep_ticker_history:
 	$(PYTHON) scripts/download_stock_data.py && $(PYTHON) scripts/collect_stock_img_data.py
+
+run_param_sweep:
+	$(PYTHON) -m lab.experiments.param_sweep

@@ -1,0 +1,13 @@
+direction: maximize
+n_trials: 20
+
+search_space:
+  train.params.discounting:
+    type: float
+    min: 0.9
+    max: 0.99
+  train.params.learning_rate:
+    type: float
+    min: 1e-5
+    max: 1e-2
+    log: true
