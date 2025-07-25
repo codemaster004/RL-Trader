@@ -1,6 +1,9 @@
 services:
   trainer:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rl-trader/trainer:latest
     volumes:
       - ./mlruns:/lab/mlruns
     depends_on:
