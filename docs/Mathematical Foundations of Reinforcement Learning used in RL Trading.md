@@ -1,16 +1,16 @@
 
 ---
-**Reinforcement Learning (RL)** is a method of training an **agent** to take **actions** in an **environment** by observing its **state**, with the goal of **maximising cumulative rewards** over time.
+**Reinforcement Learning (RL)** is a method of training an **agent** to take **actions** in an **environment** by observing its **state**, with the goal of **maximising cumulative rewards** over time.
 
 ## Reinforcement Learning - definition
-Imagine an agent (a trading bot) placed in a predefined environment - the **stock market**. At every time step - day, the agent:
-1. **Observes** the state of the environment (e.g., stock prices, trends).
-2. **Decides** which action to take (e.g., Buy, Sell, or Hold).
-3. **Receives a reward** from the environment based on whether that decision was good or bad.
+Imagine an agent (a trading bot) placed in a predefined environment - the **stock market**. At every time step - day, the agent:
+1. **Observes** the state of the environment (e.g., stock prices, trends).
+2. **Decides** which action to take (e.g., Buy, Sell, or Hold).
+3. **Receives a reward** from the environment based on whether that decision was good or bad.
 
 Over time, the agent learns which actions lead to higher rewards and adjusts its behaviour accordingly.
 
-<img src="AE_loop_dark.png" alt="Description" width="300"/>
+<img src="images/RL-img.png" alt="Description" width="300"/>
 
 ## Key Terminology dictionary
 Don't be threatened by scary math, it will be clearly explained below.
@@ -28,11 +28,11 @@ Don't be threatened by scary math, it will be clearly explained below.
 # Terminology clearly explained
 ---
 ## State - $s$
-In the context of trading on the stock market, the simplest way to think about a **state** might be the current price. However, upon reflection, it’s difficult to define robust trading rules based on price alone. For example, a rule like “if the price is 20, sell” is not very versatile or reliable.
+In the context of trading on the stock market, the simplest way to think about a **state** might be the current price. However, upon reflection, it’s difficult to define robust trading rules based on price alone. For example, a rule like “if the price is 20, sell” is not very versatile or reliable.
 
-Instead, it’s more effective to define the state using **market trends** and the **bot’s current portfolio**. For example, state can be represented by two components:
-- **Market Trend**: `TrendUp` or `TrendDown`
-- **Portfolio Status**: `NoShares` or `HasShares`
+Instead, it’s more effective to define the state using **market trends** and the **bot’s current portfolio**. For example, state can be represented by two components:
+- **Market Trend**: `TrendUp` or `TrendDown`
+- **Portfolio Status**: `NoShares` or `HasShares`
 
 An example of the agent's perceived state of the environment could then be:
 $$
@@ -43,22 +43,22 @@ where:
 - $t$ refers to the current step in the episode (e.g., trading day number 32).
 
 ## Action - $a$
-Now that we’ve defined what a **state** is, the next key concept is an **action**. In a stock trading scenario, actions are decisions that the agent (our trading bot) can take at each time step.
+Now that we’ve defined what a **state** is, the next key concept is an **action**. In a stock trading scenario, actions are decisions that the agent (our trading bot) can take at each time step.
 
 Let’s keep things simple and define three basic actions:
 - `Buy` - purchase a shares of stock
-- `Sell` - sell a shares of stock
-- `Hold` - do nothing, wait and see
+- `Sell` - sell a shares of stock
+- `Hold` - do nothing, wait and see
 
 So, for example, if considering the state from above, bot's action could be:
 $$
-a_t​=Buy
+a_t =Buy
 $$
 where:
 - $a_t$ represents the agent’s action at time step $t$.
 
 ## Reward - $r$
-Once the agent takes an action, the environment needs to respond. This response is called a **reward**, and it's how the agent learns whether the action was good or bad.
+Once the agent takes an action, the environment needs to respond. This response is called a **reward**, and it's how the agent learns whether the action was good or bad.
 
 In trading, reward could be defined in many ways, what I picked is:
 - When agent bought shares, reward at each time step $t$ is the difference between `CurrentPrice` and `PriceWhenBought` - this way, when the price goes up agent gets a positive reward, or negative when the price drops.
@@ -70,12 +70,12 @@ For example:
 - If we sell at $90 after selling price went to $100, the reward is -10.
 
 ## Episode
-In reinforcement learning, an **episode** is a single run where the agent interacts with the environment from a starting point to an endpoint.
+In reinforcement learning, an **episode** is a single run where the agent interacts with the environment from a starting point to an endpoint.
 
-In stock trading, one episode could be the agent trading through a **year of historical market data**, making decisions each day based on the current state, taking actions, receiving rewards, and moving to the next state.
+In stock trading, one episode could be the agent trading through a **year of historical market data**, making decisions each day based on the current state, taking actions, receiving rewards, and moving to the next state.
 
 ## Trajectory
-A **trajectory** is the complete sequence of everything that happens during an episode. It includes the **states**, **actions**, and **rewards** the agent experiences from start to finish.
+A **trajectory** is the complete sequence of everything that happens during an episode. It includes the **states**, **actions**, and **rewards** the agent experiences from start to finish.
 
 Formally, a trajectory can be written as:
 $$
@@ -87,10 +87,10 @@ In the context of stock trading, a trajectory could represent one full trading y
 - $a_t$ - decides what to do (**actions**),
 - $r_t$ - received feedback (**rewards**) after each decision.
 
-The trajectory captures the **full experience** of the agent in one episode and is used to evaluate or improve during training.
+The trajectory captures the **full experience** of the agent in one episode and is used to evaluate or improve during training.
 
 ## Policy – $\pi$
-The **policy** is like the brain of the agent - it’s the strategy that decides which action to take in a given state.
+The **policy** is like the brain of the agent - it’s the strategy that decides which action to take in a given state.
 
 Formally, a policy is a function (probability of choosing action $a$ given state $s$):
 $$
@@ -108,15 +108,16 @@ Commonly used simple policies:
 - $\epsilon$-greedy: sometimes picks the best action sometimes random.
 - softmax: select actions with higher mean reward, according to softmax function.
 
-## Discount Factor - $\gamma$
-The **discount factor**, written as $\gamma$, is a number between 0 and 1 that controls **how much the agent values future rewards** compared to immediate ones.
+## Discount Factor - $\gamma$
+The **discount factor**, written as $\gamma$, is a number between 0 and 1 that controls **how much the agent values future rewards** compared to immediate ones.
 
 In simple terms:
-- A **low** $\gamma$ (close to 0) means the agent cares **mostly about immediate rewards**.
-- A **high** $\gamma$ (close to 1) means the agent cares **more about long-term rewards**.
+- A **low** $\gamma$ (close to 0) means the agent cares **mostly about immediate rewards**.
+- A **high** $\gamma$ (close to 1) means the agent cares **more about long-term rewards**.
 
-## Grand Total Return - $G_t$
-The **grand total return**, written as $G_t$, is the **total reward the agent expects to receive starting from time step** $t$ until the end of the episode. It combines **immediate and future rewards**, possibly discounted, into a single number.
+## Grand Total Return - $G_t$
+The **grand total return**, written as $G_t$, is the **total reward the agent expects to receive starting from time step** $t$ until the end of the episode.
+It combines **immediate and future rewards**, possibly discounted, into a single number.
 
 $$
 G_t = \sum^{T-t-1}_{k=0}\gamma^k r_{t+k+1}
@@ -125,16 +126,16 @@ $$
 G_t = r_{t+1} + \gamma r_{t+2} + \gamma^2 r_{t+3} + ... + \gamma^{T-t-1}r_T
 $$
 Where:
-- $r_t+1​$ is the reward received after taking action at time $t$,
-- $\gamma$ is the **discount factor** (see above).
-- $T$ is the final step of the episode (e.g., final day of trading data)
+- $r_t+1$ is the reward received after taking action at time $t$,
+- $\gamma$ is the **discount factor** (see above).
+- $T$ is the final step of the episode (e.g., final day of trading data)
 
-## Action-Value Function - $Q^π(s,a)$
-The **action-value function** tells us **how good is it to take a specific action $a$ in a specific state $s$**, assuming the agent will follow policy $\pi$ afterward.
+## Action-Value Function - $Q^π(s,a)$
+The **action-value function** tells us **how good is it to take a specific action $a$ in a specific state $s$**, assuming the agent will follow policy $\pi$ afterward.
 
 Formal definition:
 $$
-Q^\pi(s,a)= \mathbb{E}_\pi \left[ G_t​ | s_t​=s,a_t​=a \right]
+Q^\pi(s,a)= \mathbb{E}_\pi \left[ G_t | s_t =s,a_t =a \right]
 $$
 
 As we can see above, the **Action-Value Function** 

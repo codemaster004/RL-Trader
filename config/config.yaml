@@ -18,4 +18,4 @@ train:
 env:
   options:
     simulations_length: 1000
-    mu: -0.0005
+    mu: 0.0005
