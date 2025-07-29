@@ -6,3 +6,4 @@ options:
   init_days: 60
   mu: 0.0005
   sigma: 0.01
+  random_trends: false

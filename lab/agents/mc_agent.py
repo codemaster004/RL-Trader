@@ -58,7 +58,7 @@ class MonteCarloAgent(BaseAgent):
 		for s, a, r in zip(states, actions, rewards):
 			self.q_table[(*s, a)] += alpha * (r - self.q_table[(*s, a)])
 
-	def train(self, env=None, env_options=None, *args, **kwargs):
+	def train(self, env=None, env_options=None, seed=None, *args, **kwargs):
 		self.env_options = env_options
 		(
 			learning_rate,
@@ -70,6 +70,10 @@ class MonteCarloAgent(BaseAgent):
 		) = self._extract_train_kwargs(**kwargs)
 		
 		log.info(f'[{self.__class__.__name__}]: Starting Training...')
+		
+		np.random.seed(seed)
+		env.reset(seed=seed)
+		
 		for episode in range(episodes):
 			env.reset()
 			self.buffer.reset()

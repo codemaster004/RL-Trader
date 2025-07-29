@@ -23,6 +23,8 @@ class GenerativeEnv(gym.Env):
 			"init_days": 60,
 			"mu": 0.0005,
 			"sigma": 0.01,
+			"random_trends": False,
+			"mu_range": [-0.001, 0.002],
 		}
 		
 		# Env RL attributes
@@ -44,6 +46,10 @@ class GenerativeEnv(gym.Env):
 
 		self.init_options.update(options)
 		self.funds = self.init_options["funds"]
+		
+		if self.init_options["random_trends"]:
+			_range = self.init_options["mu_range"]
+			self.init_options["mu"] = _range[0] + np.random.rand() * (_range[1] - _range[0])
 		
 		self.max_steps = self.init_options["simulations_length"]
 		self._current_step = 0

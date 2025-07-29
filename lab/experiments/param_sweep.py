@@ -39,8 +39,8 @@ def sweep(cfg):
 			mlflow.log_params(cfg.agent.train_params)
 			mlflow.log_params(cfg.agent.params)
 			mlflow.log_params(cfg.env.options)
-			
-			agent.train(env=env, env_options=cfg.env.options, **cfg.train.params, **cfg.agent.train_params)
+
+			agent.train(env=env, env_options=cfg.env.options, seed=cfg.seed, **cfg.train.params, **cfg.agent.train_params)
 			
 			final_return = eval_agent(env, agent, cfg)
 			mlflow.log_metric("final_return", final_return)

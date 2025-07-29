@@ -14,7 +14,7 @@ class QLearningAgent(BaseAgent):
 	def update(self, *args, **kwargs):
 		pass
 
-	def train(self, env=None, env_options=None, *args, **kwargs):
+	def train(self, env=None, env_options=None, seed=None, *args, **kwargs):
 		if env is None and env_fn is None:
 			raise ValueError('env or env_fn is required')
 

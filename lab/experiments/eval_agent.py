@@ -89,7 +89,7 @@ def main(cfg: DictConfig):
 	agent = getattr(importlib.import_module(cfg.agent.type), cfg.agent.name)(**cfg.agent.params)
 
 	agent.load(path='saves', filename='MC-Agent.npy')
-	eval_agent(env, agent, cfg=cfg, show=False)
+	eval_agent(env, agent, cfg=cfg, show=True)
 
 
 if __name__ == '__main__':

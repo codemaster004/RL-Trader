@@ -9,24 +9,27 @@ defaults:
 seed: 1
 
 experiment:
-  name: Sweep
+  name: Sweep-1Year
 
 train:
-  run_name: MiniRun
+  run_name: Trial
   params:
     learning_rate: 0.0001
-    trajectories_per_episode: 10
-    threads_per_episode: 10
+    discounting: 0.95
     episodes: 3000
 
 env:
+  register_id: SimpleTrends-v1 
   options:
-    simulations_length: 700
+    simulations_length: 356
     init_days: 120
     mu: 0.0005
+    random_trends: true
+    short_sma: 26
+    long_sma: 66
 
 tuning:
-  n_trials: 10
+  n_trials: 30
   search_space:
     env.options.short_sma:
       type: int
